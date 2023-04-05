@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     match action:
         case "-i":
-            sp.run(["sudo", "apt", "install", "nginx", "-y"])
+            sp.run(["sudo", "apt-get", "-qq", "install", "nginx", "-y"])
         case "-u":
             sp.run(["sudo", "systemctl", "stop", "nginx"])
             sp.run(["sudo", "apt", "remove", "nginx", "nginx-common", "nginx-core"])

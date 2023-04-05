@@ -1,21 +1,20 @@
 import requests
+import subprocess as sp
 
 
-original = open("wp-conf.txt", "r")
-tmp = open("wp-tmp.txt", "w")
+wp_folder_dir = "/var/www/html/wordpress"
+sp.run(f"sudo mv {wp_folder_dir}/wp-config-sample.php {wp_folder_dir}/wp-config.php".split(" "))
 
-# Debug data
-db_name = "wp-db"
-db_user = "wp-admin"
-db_passwd = "wp-passwd"
+original = open(wp_folder_dir + "/wp-config.php", "r")
+tmp = open("/tmp/wp-tmp-conf", "w")
 
 url = 'https://api.wordpress.org/secret-key/1.1/salt/'
 response = requests.get(url)
 salts = response.text.splitlines(True)
 
 if response.status_code != 200:
-    print("[WARNING] An error occurred: ", response.status_code)
-    print("[INFO] Skipping writing SALT")
+    print("[WARNING] An error occurred when retreaving salt: ", response.status_code)
+    print("[INFO] Skipping writing salt...")
     for line in original.readlines():
         match line.strip():
             case "define( 'DB_NAME', 'database_name_here' );":
@@ -29,7 +28,13 @@ if response.status_code != 200:
     tmp.close()
     original.close()
         
-    #TODO: Write tmp into original
+    original = open(wp_folder_dir + "/wp-config.php", "w")
+    tmp = open("/tmp/wp-tmp-conf", "r")
+
+    original.write(tmp.read())
+
+    tmp.close()
+    original.close()
     exit()
 
 
@@ -63,5 +68,10 @@ for line in original.readlines():
 tmp.close()
 original.close()
 
-#TODO: Write tmp into original
+original = open(wp_folder_dir + "/wp-config.php", "w")
+tmp = open("/tmp/wp-tmp-conf", "r")
 
+original.write(tmp.read())
+
+tmp.close()
+original.close()

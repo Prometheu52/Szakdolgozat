@@ -7,5 +7,5 @@ if __name__ == '__main__':
         log(Log.ERROR, "Only linux platform is supported")
         exit()
     
-    sp.run(["sudo", "apt", "install", "php-fpm", "-y"])
-    sp.run(["sudo", "apt-get", "install", "php-mysql", "-y"])
+    sp.run(["sudo", "apt-get", "-qq", "install", "php-fpm", "-y"])
+    sp.run(["sudo", "apt-get", "-qq", "install", "php-mysql", "-y"])

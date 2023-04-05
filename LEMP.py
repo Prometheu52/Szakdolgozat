@@ -60,14 +60,14 @@ if os.geteuid() != 0:
     exit()
 
 # General updates
-log(Log.INFO, "apt update && upgrade && dist-upgrade...")
-sp.run("sudo apt update -y".split(" "))
-sp.run("sudo apt upgrade -y".split(" "))
-sp.run("sudo apt dist-upgrade".split(" "))
+log(Log.INFO, "updating system (this might take some time)...")
+sp.run("sudo apt-get -qq update -y".split(" "))
+sp.run("sudo apt-get -qq upgrade -y".split(" "))
+sp.run("sudo apt-get -qq dist-upgrade -y".split(" "))
 
 # Dependency handling
 log(Log.INFO, "Downloading python modules...")
-sp.run(["sudo", "apt-get", "install", "python3-pip", "-y"])
+sp.run(["sudo", "apt-get", "-qq", "install", "python3-pip", "-y"])
 sp.run(["pip", "install", "-r", "requirements.txt"])
 
 import mysql.connector
@@ -83,8 +83,8 @@ sp.run(["python3", "php_module.py"])
 sp.run(["python3", "wordpress_module.py"])
 
 # Configure nginx
-# TODO: Remove default-nginx-welcome-page.html
 sp.run(["sudo", "service", "nginx", "stop"])
+sp.run("sudo rm /var/www/html/index.nginx-debian.html".split(" "))
 
 conf_file = open("/etc/nginx/sites-available/wordpress.conf", "w")
 conf = open("wordpress-conf", "r")
@@ -120,9 +120,80 @@ else:
     #TODO: Handle the aftemath gracefully
     log(Log.WARN, "Skipping table and user creation...")
 
-
-
 # Configure wordpress
-# Copy code from test2.py
+wp_folder_dir = "/var/www/html/wordpress"
+sp.run(f"sudo mv {wp_folder_dir}/wp-config-sample.php {wp_folder_dir}/wp-config.php".split(" "))
+
+original = open(wp_folder_dir + "/wp-config.php", "r")
+tmp = open("/tmp/wp-tmp-conf", "w")
+
+url = 'https://api.wordpress.org/secret-key/1.1/salt/'
+response = requests.get(url)
+salts = response.text.splitlines(True)
+
+if response.status_code != 200:
+    print("[WARNING] An error occurred when retreaving salt: ", response.status_code)
+    print("[INFO] Skipping writing salt...")
+    for line in original.readlines():
+        match line.strip():
+            case "define( 'DB_NAME', 'database_name_here' );":
+                tmp.write(f"define( 'DB_NAME', '{wp_database}' );")
+            case "define( 'DB_USER', 'username_here' );":
+                tmp.write(f"define( 'DB_USER', '{wp_acc_name}' );")
+            case "define( 'DB_PASSWORD', 'password_here' );":
+                tmp.write(f"define( 'DB_PASSWORD', '{wp_acc_passwd}' );")
+            case other:
+                tmp.write(line)
+    tmp.close()
+    original.close()
+        
+    original = open(wp_folder_dir + "/wp-config.php", "w")
+    tmp = open("/tmp/wp-tmp-conf", "r")
+
+    original.write(tmp.read())
+
+    tmp.close()
+    original.close()
+else:
+    for line in original.readlines():
+        match line.strip():
+            case "define( 'DB_NAME', 'database_name_here' );":
+                tmp.write(f"define( 'DB_NAME', '{wp_database}' );")
+            case "define( 'DB_USER', 'username_here' );":
+                tmp.write(f"define( 'DB_USER', '{wp_acc_name}' );")
+            case "define( 'DB_PASSWORD', 'password_here' );":
+                tmp.write(f"define( 'DB_PASSWORD', '{wp_acc_passwd}' );")
+            case "define( 'AUTH_KEY',         'put your unique phrase here' );":
+                tmp.write(salts[0])
+            case "define( 'SECURE_AUTH_KEY',  'put your unique phrase here' );":
+                tmp.write(salts[1])
+            case "define( 'LOGGED_IN_KEY',    'put your unique phrase here' );":
+                tmp.write(salts[2])
+            case "define( 'NONCE_KEY',        'put your unique phrase here' );":
+                tmp.write(salts[3])
+            case "define( 'AUTH_SALT',        'put your unique phrase here' );":
+                tmp.write(salts[4])
+            case "define( 'SECURE_AUTH_SALT', 'put your unique phrase here' );":
+                tmp.write(salts[5])
+            case "define( 'LOGGED_IN_SALT',   'put your unique phrase here' );":
+                tmp.write(salts[6])
+            case "define( 'NONCE_SALT',       'put your unique phrase here' );":
+                tmp.write(salts[7])
+            case other:
+                tmp.write(line)
+
+    tmp.close()
+    original.close()
+
+    original = open(wp_folder_dir + "/wp-config.php", "w")
+    tmp = open("/tmp/wp-tmp-conf", "r")
+
+    original.write(tmp.read())
+
+    tmp.close()
+    original.close()
+
+log(Log.INFO, "LEMP installation is finished!")
+log(Log.INFO, "To start the server run the following: sudo service nginx start")
 
 # sudo usermod -a -G vboxsf all-in-one

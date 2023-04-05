@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     match action:
         case "-i":
-            sp.run(["sudo", "apt", "install", "mysql-server", "-y"])
+            sp.run(["sudo", "apt-get", "-qq", "install", "mysql-server", "-y"])
         case "-u":
             sp.run(["sudo", "systemctl", "stop", "mysql"])
             sp.run(["sudo", "apt", "remove", "mysql*"])

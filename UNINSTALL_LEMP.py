@@ -14,6 +14,7 @@ if os.geteuid() != 0:
 log(Log.WARN, "This will remove EVERYTHING! \nConfiguration and program files regarding nginx, mysql and wordpress; and ALL content in the wordpress folder.")
 r_u_sure = input("Do you want to proceed? Yes/n: ").strip()
 if r_u_sure != "Yes":
+    log(Log.INFO, "Exiting..")
     exit()
 
 sp.run(["python3", "nginx_module.py", "-p"])

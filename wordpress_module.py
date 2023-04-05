@@ -13,7 +13,7 @@ if __name__ == '__main__':
         directory = sys.argv[1]
 
         sp.run(["sudo", "wget", "-P", f"{directory}", "https://wordpress.org/latest.tar.gz"])
-        sp.run(["sudo", "tar", "-xvzf", f"{directory}/latest.tar.gz", "-C", f"{directory}"])
+        sp.run(["sudo", "tar", "-xzf", f"{directory}/latest.tar.gz", "-C", f"{directory}"])
         sp.run(["sudo", "rm", f"{directory}/latest.tar.gz"])
     else:
         if os.geteuid() != 0:
@@ -25,6 +25,6 @@ if __name__ == '__main__':
             sp.run(["sudo", "mkdir", "-p", f"{directory}"])
 
         sp.run(["sudo", "wget", "-P", f"{directory}", "https://wordpress.org/latest.tar.gz"])
-        sp.run(["sudo", "tar", "-xvzf", f"{directory}/latest.tar.gz", "-C", f"{directory}"])
+        sp.run(["sudo", "tar", "-xzf", f"{directory}/latest.tar.gz", "-C", f"{directory}"])
         sp.run(["sudo", "rm", f"{directory}/latest.tar.gz"])
 
