@@ -51,7 +51,7 @@ if not is_online():
     log(Log.ERROR, "The installation requieres internet connection. Please check your internet connection!")
     exit()
 
-if not sys.platform.startswith('linux'):
+if not sys.platform.lower().startswith('linux'):
     log(Log.ERROR, "Only linux platform is supported!")
     exit()
 
@@ -87,15 +87,12 @@ sp.run(["sudo", "service", "nginx", "stop"])
 sp.run("sudo rm /var/www/html/index.nginx-debian.html".split(" "))
 
 conf_file = open("/etc/nginx/sites-available/wordpress.conf", "w")
-conf = open("wordpress-conf", "r")
+conf = open("nginx-wordpress-conf", "r")
 conf_file.write(conf.read())
 
 # Cerate symlink
 sp.run(["sudo", "ln", "-s", "/etc/nginx/sites-available/wordpress.conf", "/etc/nginx/sites-enabled"])
 sp.run(["sudo", "unlink", "/etc/nginx/sites-enabled/default"])
-
-# Restart nginx
-log(Log.INFO, "To start the web-server, later run the following: sudo service nginx start\n")
 
 # Configure mysql
 log(Log.INFO, "Default password for ROOT is 'root'")
@@ -117,8 +114,8 @@ if mydb is not None:
 
     mydb.close()
 else:
-    #TODO: Handle the aftemath gracefully
-    log(Log.WARN, "Skipping table and user creation...")
+    log(Log.ERROR, "Something went terribly wrong")
+    log(Log.ERROR, "No connection to database after successful authentication")
 
 # Configure wordpress
 wp_folder_dir = "/var/www/html/wordpress"
