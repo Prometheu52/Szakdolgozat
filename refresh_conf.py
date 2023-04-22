@@ -31,8 +31,9 @@ match len(sys.argv):
                 change_config(sys.argv[2])
     case other:
         usage()
+        exit()
 
-if not os.path.isfile("/etc/nginx/sites-available/wordpress.conf"):
+if not os.path.isfile("/etc/nginx/sites-enabled"):
     sp.run(["sudo", "ln", "-s", "/etc/nginx/sites-available/wordpress.conf", "/etc/nginx/sites-enabled"])
 
 if os.path.isfile("/etc/nginx/sites-enabled/default"):

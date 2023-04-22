@@ -10,8 +10,12 @@ def print_usage():
 if __name__ == '__main__':
     if not sys.platform.startswith('linux'):
         log(Log.ERROR, "Only linux platform is supported")
-        exit(1)
+        exit()
     
+    if os.geteuid() != 0:
+        log(Log.ERROR, f"Run with sudo!\nComand: sudo python3 {os.path.relpath(__file__)}")
+        exit()
+
     try:
         action = sys.argv[1]
     except:

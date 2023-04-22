@@ -15,21 +15,23 @@ def is_online():
     return False
 
 def connect_to_mysql(user, host):
-    log(Log.INFO, "Please enter root password")
-    for i in range(3):
-        try:
-            password = getpass.getpass("Enter password: ")
-            conn = mysql.connector.connect(
-                user=user,
-                host=host,
-                consume_results=True,
-                password=password,)
-            print("Connected to database!")
-            return conn
-        except mysql.connector.Error as e:
-            print("Error: ", e)
-    log(Log.WARN, "Failed to connect to database after 3 attempts.")
-    return None
+    message = "Please enter MySQL root password"
+    while True:
+        for i in range(3):
+            try:
+                log(Log.INFO, message)
+                password = getpass.getpass("Enter password: ")
+                conn = mysql.connector.connect(
+                    user=user,
+                    host=host,
+                    consume_results=True,
+                    password=password,)
+                print("Connected to database!")
+                return conn
+            except mysql.connector.Error as e:
+                print("Error: ", e)
+        log(Log.WARN, "Failed to connect to database after 3 attempts.")
+        message = "Please provide the MySQL root password to continue setup"
 
 def confirm_input(text):
     while True:
@@ -46,6 +48,8 @@ def create_passwd() -> str:
             return first
         log(Log.INFO, "Passwords does not macth! Try again!")
     
+def clear():
+    _ = sp.call('clear')
 
 if not is_online():
     log(Log.ERROR, "The installation requieres internet connection. Please check your internet connection!")
@@ -64,11 +68,13 @@ log(Log.INFO, "updating system (this might take some time)...")
 sp.run("sudo apt-get -qq update -y".split(" "))
 sp.run("sudo apt-get -qq upgrade -y".split(" "))
 sp.run("sudo apt-get -qq dist-upgrade -y".split(" "))
+clear()
 
 # Dependency handling
 log(Log.INFO, "Downloading python modules...")
 sp.run(["sudo", "apt-get", "-qq", "install", "python3-pip", "-y"])
 sp.run(["pip", "install", "-r", "requirements.txt"])
+clear()
 
 import mysql.connector
 import requests
@@ -87,33 +93,34 @@ sp.run(["sudo", "service", "nginx", "stop"])
 sp.run("sudo rm /var/www/html/index.nginx-debian.html".split(" "))
 
 sp.run("sudo python3 refresh_conf.py".split(" "))
-
-# Cerate symlink
-sp.run(["sudo", "ln", "-s", "/etc/nginx/sites-available/wordpress.conf", "/etc/nginx/sites-enabled"])
-sp.run(["sudo", "unlink", "/etc/nginx/sites-enabled/default"])
+clear()
 
 # Configure mysql
+log(Log.INFO, "Executing external third party setup tool...")
 log(Log.INFO, "Default password for ROOT is 'root'")
 sp.run(["sudo", "mysql", "--execute=ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'root';FLUSH PRIVILEGES;"])
-sp.run(["mysql_secure_installation"])
+while True:
+    try:
+        sp.run(["mysql_secure_installation"], check=True)
+        break
+    except:
+        log(Log.INFO, "Default password for ROOT is 'root'")
 
 mydb = connect_to_mysql("root", "localhost")
 wp_database = "wordpress_database"
 wp_acc_name, wp_acc_passwd = (None, None)
-if mydb is not None:
-    log(Log.INFO, "Please, create login credentials for the MySQL WordPress database account!")
-    wp_acc_name = confirm_input("Account name: ")
-    wp_acc_passwd = create_passwd()
 
-    mycursor = mydb.cursor()
-    mycursor.execute(f"CREATE DATABASE {wp_database} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci")
-    mycursor.execute(f"CREATE USER '{wp_acc_name}'@'localhost' IDENTIFIED WITH caching_sha2_password BY '{wp_acc_passwd}'")
-    mycursor.execute(f"GRANT ALL PRIVILEGES ON {wp_database}.* TO '{wp_acc_name}'@'localhost'")
+log(Log.INFO, "Please, create login credentials for the MySQL WordPress database account!")
+wp_acc_name = confirm_input("Account name: ")
+wp_acc_passwd = create_passwd()
 
-    mydb.close()
-else:
-    log(Log.ERROR, "Something went terribly wrong")
-    log(Log.ERROR, "No connection to database after successful authentication")
+mycursor = mydb.cursor()
+mycursor.execute(f"CREATE DATABASE {wp_database} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci")
+mycursor.execute(f"CREATE USER '{wp_acc_name}'@'localhost' IDENTIFIED WITH caching_sha2_password BY '{wp_acc_passwd}'")
+mycursor.execute(f"GRANT ALL PRIVILEGES ON {wp_database}.* TO '{wp_acc_name}'@'localhost'")
+
+mydb.close()
+clear()
 
 # Configure wordpress
 wp_folder_dir = "/var/www/html/wordpress"
