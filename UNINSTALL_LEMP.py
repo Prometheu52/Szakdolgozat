@@ -21,4 +21,4 @@ sp.run(["python3", "nginx_module.py", "-p"])
 sp.run(["python3", "mysql_module.py", "-p"])
 sp.run("sudo rm -rf /var/www/html/wordpress".split(" "))
 
-
+# Remove SSL certs?
