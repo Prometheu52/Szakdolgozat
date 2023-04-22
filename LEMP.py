@@ -56,7 +56,7 @@ if not sys.platform.lower().startswith('linux'):
     exit()
 
 if os.geteuid() != 0:
-    log(Log.ERROR, "Run with sudo!\nComand: sudo python3 LEMP.py")
+    log(Log.ERROR, f"Run with sudo!\nComand: sudo python3 {os.path.relpath(__file__)}")
     exit()
 
 # General updates
@@ -86,9 +86,7 @@ sp.run(["python3", "wordpress_module.py"])
 sp.run(["sudo", "service", "nginx", "stop"])
 sp.run("sudo rm /var/www/html/index.nginx-debian.html".split(" "))
 
-conf_file = open("/etc/nginx/sites-available/wordpress.conf", "w")
-conf = open("nginx-wordpress-conf", "r")
-conf_file.write(conf.read())
+sp.run("sudo python3 refresh_conf.py".split(" "))
 
 # Cerate symlink
 sp.run(["sudo", "ln", "-s", "/etc/nginx/sites-available/wordpress.conf", "/etc/nginx/sites-enabled"])

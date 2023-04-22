@@ -9,22 +9,14 @@ if __name__ == '__main__':
         log(Log.ERROR, "Only linux platform is supported")
         exit()
 
-    if len(sys.argv) != 1:
-        directory = sys.argv[1]
+    if os.geteuid() != 0:
+        log(Log.ERROR, f"Run with sudo!\nComand: sudo python3 {os.path.relpath(__file__)}")
+        exit()
 
-        sp.run(["sudo", "wget", "-P", f"{directory}", "https://wordpress.org/latest.tar.gz"])
-        sp.run(["sudo", "tar", "-xzf", f"{directory}/latest.tar.gz", "-C", f"{directory}"])
-        sp.run(["sudo", "rm", f"{directory}/latest.tar.gz"])
-    else:
-        if os.geteuid() != 0:
-            log(Log.ERROR, "Run with sudo!\nComand: sudo python3 LEMP.py")
-            exit()
-        
-        directory = "/var/www/html"
-        if not os.path.exists(directory):
-            sp.run(["sudo", "mkdir", "-p", f"{directory}"])
+    directory = sys.argv[1] if len(sys.argv) == 2 else "/var/www/html"
 
-        sp.run(["sudo", "wget", "-P", f"{directory}", "https://wordpress.org/latest.tar.gz"])
-        sp.run(["sudo", "tar", "-xzf", f"{directory}/latest.tar.gz", "-C", f"{directory}"])
-        sp.run(["sudo", "rm", f"{directory}/latest.tar.gz"])
+    sp.run(["sudo", "wget", "-P", f"{directory}", "https://wordpress.org/latest.tar.gz"])
+    sp.run(["sudo", "tar", "-xzf", f"{directory}/latest.tar.gz", "-C", f"{directory}"])
+    sp.run(["sudo", "rm", f"{directory}/latest.tar.gz"])
+
 

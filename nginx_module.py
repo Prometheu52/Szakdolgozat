@@ -4,7 +4,7 @@ import sys
 
 
 def print_usage():
-    log(Log.ERROR, f"Wrong input arguments\nUsage:\npython {__file__}.py <arg>\n\targ:\n\t-i -> install\n\t-u -> uninstall\n\t-p -> purge (completely removes the application including config files)")
+    log(Log.ERROR, f"Wrong input arguments\nUsage:\npython {os.path.relpath(__file__)}.py <arg>\n\targ:\n\t-i -> install\n\t-u -> uninstall\n\t-p -> purge (completely removes the application including config files)")
 
 
 if __name__ == '__main__':
