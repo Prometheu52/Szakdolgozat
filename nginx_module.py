@@ -1,11 +1,24 @@
-import subprocess as sp
 from log import log, Log
+import subprocess as sp
 import sys
 import os
 
 
 def print_usage():
     log(Log.ERROR, f"Wrong input arguments\nUsage:\npython {os.path.relpath(__file__)}.py <arg>\n\targ:\n\t-i -> install\n\t-u -> uninstall\n\t-p -> purge (completely removes the application including config files)")
+
+def install():
+    sp.run(["sudo", "apt-get", "-qq", "install", "nginx", "-y"])
+
+def uninstall():
+    sp.run(["sudo", "systemctl", "stop", "nginx"])
+    sp.run(["sudo", "apt", "remove", "nginx", "nginx-common", "nginx-core"])
+
+def purge():
+    sp.run(["sudo", "systemctl", "stop", "nginx"])
+    sp.run(["sudo", "apt", "purge", "nginx", "nginx-common", "nginx-core"])
+    sp.run(["sudo", "apt", "autoremove"])
+    sp.run(["sudo", "apt", "autoclean"])
 
 
 if __name__ == '__main__':
@@ -25,15 +38,11 @@ if __name__ == '__main__':
 
     match action:
         case "-i":
-            sp.run(["sudo", "apt-get", "-qq", "install", "nginx", "-y"])
+            install()
         case "-u":
-            sp.run(["sudo", "systemctl", "stop", "nginx"])
-            sp.run(["sudo", "apt", "remove", "nginx", "nginx-common", "nginx-core"])
+            uninstall()
         case "-p":
-            sp.run(["sudo", "systemctl", "stop", "nginx"])
-            sp.run(["sudo", "apt", "purge", "nginx", "nginx-common", "nginx-core"])
-            sp.run(["sudo", "apt", "autoremove"])
-            sp.run(["sudo", "apt", "autoclean"])
+            purge()
         case other:
             print_usage()
             exit()

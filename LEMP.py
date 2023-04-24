@@ -80,16 +80,20 @@ import mysql.connector
 import requests
 import getpass
 
+import nginx_module
+import mysql_module
+import php_module
+import wordpress_module
 
 # Install requiered softwares
 log(Log.INFO, "Downloading software packages...")
-sp.run(["python3", "nginx_module.py", "-i"])
-sp.run(["python3", "mysql_module.py", "-i"])
-sp.run(["python3", "php_module.py"])
-sp.run(["python3", "wordpress_module.py"])
+nginx_module.install()
+mysql_module.install()
+php_module.install()
+wordpress_module.install()
 
 # Configure nginx
-sp.run(["sudo", "service", "nginx", "stop"])
+sp.run("sudo service nginx stop".split(" "))
 sp.run("sudo rm /var/www/html/index.nginx-debian.html".split(" "))
 
 sp.run("sudo python3 refresh_conf.py".split(" "))
@@ -98,7 +102,9 @@ clear()
 # Configure mysql
 log(Log.INFO, "Executing external third party setup tool...")
 log(Log.INFO, "Default password for ROOT is 'root'")
+
 sp.run(["sudo", "mysql", "--execute=ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'root';FLUSH PRIVILEGES;"])
+
 while True:
     try:
         sp.run(["mysql_secure_installation"], check=True)

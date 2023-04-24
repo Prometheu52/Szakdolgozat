@@ -17,8 +17,12 @@ if r_u_sure != "Yes":
     log(Log.INFO, "Exiting..")
     exit()
 
-sp.run(["python3", "nginx_module.py", "-p"])
-sp.run(["python3", "mysql_module.py", "-p"])
+import nginx_module
+import mysql_module
+
+nginx_module.purge()
+mysql_module.purge()
 sp.run("sudo rm -rf /var/www/html/wordpress".split(" "))
 
 # Remove SSL certs?
+# sudo rm "/etc/ssl/private/wp_cipher.key" && sudo rm "/etc/ssl/certs/wp_cipher.crt"
