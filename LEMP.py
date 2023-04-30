@@ -85,6 +85,8 @@ import mysql_module
 import php_module
 import wordpress_module
 
+import pw
+
 # Install requiered softwares
 log(Log.INFO, "Downloading software packages...")
 nginx_module.install()
@@ -98,6 +100,9 @@ sp.run("sudo rm /var/www/html/index.nginx-debian.html".split(" "))
 
 sp.run("sudo python3 refresh_conf.py".split(" "))
 clear()
+
+# Password validation component
+strength = pw.ask()
 
 # Configure mysql
 log(Log.INFO, "Executing external third party setup tool...")
@@ -118,7 +123,7 @@ wp_acc_name, wp_acc_passwd = (None, None)
 
 log(Log.INFO, "Please, create login credentials for the MySQL WordPress database account!")
 wp_acc_name = confirm_input("Account name: ")
-wp_acc_passwd = create_passwd()
+wp_acc_passwd = pw.create_passwd(strength)
 
 mycursor = mydb.cursor()
 mycursor.execute(f"CREATE DATABASE {wp_database} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci")
