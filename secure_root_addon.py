@@ -11,6 +11,9 @@ def change_passwd(user: str):
     sp.run(["sudo", "usermod", "-p", f"$(openssl passwd -6 {new_passwd})", f"{user}"])
 
 if __name__ == '__main__':
+    log(Log.ERROR, "This addon is under maintanance! Quitting application...")
+    exit()
+    
     if not sys.platform.startswith('linux'):
         log(Log.ERROR, "Only linux platform is supported")
         exit()
