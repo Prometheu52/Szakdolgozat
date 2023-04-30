@@ -26,8 +26,11 @@ if __name__ == '__main__':
         log(Log.WARN, f"This action will change \'{running_user}\' user\'s password rather than the \'{admin_user}\'")
         match input("Do you wish to continue? (y/n): ").strip().lower():
             case "y":
+                log(Log.INFO, f"Changing password for \'{getpass.getuser()}\'")
                 change_passwd(getpass.getuser())
             case other:
+                log(Log.INFO, f"Changing password for \'{admin_user}\'")
                 change_passwd(admin_user)
     else:
+        log(Log.INFO, f"Changing password for \'{admin_user}\'")
         change_passwd(admin_user)
