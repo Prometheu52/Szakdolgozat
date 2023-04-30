@@ -6,9 +6,9 @@ import sys
 import os
 
 
-def change_passwd():
+def change_passwd(user: str):
     new_passwd = pw.create_passwd(pw.ask(), prompt="New password: ")
-    sp.run(["sudo", "usermod", "-p", f"$(openssl passwd -6 {new_passwd})", f"{getpass.getuser()}"])
+    sp.run(["sudo", "usermod", "-p", f"$(openssl passwd -6 {new_passwd})", f"{user}"])
 
 if __name__ == '__main__':
     if not sys.platform.startswith('linux'):
@@ -26,8 +26,8 @@ if __name__ == '__main__':
         log(Log.WARN, f"This action will change \'{running_user}\' user\'s password rather than the \'{admin_user}\'")
         match input("Do you wish to continue? (y/n): ").strip().lower():
             case "y":
-                change_passwd()
+                change_passwd(getpass.getuser())
             case other:
-                exit()
+                change_passwd(admin_user)
     else:
-        change_passwd()
+        change_passwd(admin_user)
