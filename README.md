@@ -1,4 +1,4 @@
-# Automation tool to setup a LEMP serven on Linux Mint Cinnamon edition
+# Automation tool to setup a LEMP serven under Linux Mint Cinnamon edition
 
 This is a thesis project, and it's not intended for use in production!
 
